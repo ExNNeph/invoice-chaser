@@ -1,0 +1,22 @@
+[project]
+name = "invoice-chaser"
+version = "0.1.0"
+description = "Polite, escalating payment reminders for freelancers, drafted by an LLM with a deterministic fallback."
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2", "anthropic>=0.40"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+invoice-chaser = "invoice_chaser.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "evals"]

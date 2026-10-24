@@ -1,0 +1,2 @@
+number,client_name,client_email,amount,currency,due_date,paid,last_reminder,sender_name
+R-2026-001,Acme GmbH,bill@acme.de,1200.00,EUR,2026-01-10,false,,Alexander

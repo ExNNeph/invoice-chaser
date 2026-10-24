@@ -1,0 +1,6 @@
+[
+  {"number": "R-2026-001", "client_name": "Acme GmbH", "client_email": "bill@acme.de", "amount": 1200.0, "currency": "EUR", "due_date": "2026-01-10", "stage": "friendly"},
+  {"number": "INV-77", "client_name": "Jane Doe", "client_email": "jane@example.com", "amount": 49.9, "currency": "USD", "due_date": "2026-02-01", "stage": "firm"},
+  {"number": "2026/14", "client_name": "Studio Nord", "client_email": "ap@nord.de", "amount": 15750.5, "currency": "EUR", "due_date": "2026-03-15", "stage": "final"},
+  {"number": "A-9", "client_name": "Kuppfel UG", "client_email": "info@kuppfel.de", "amount": 300.0, "currency": "EUR", "due_date": "2026-04-30", "stage": "firm"}
+]
