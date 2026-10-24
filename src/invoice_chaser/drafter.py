@@ -62,4 +62,4 @@ def _llm_draft(inv: Invoice, stage: Stage) -> str:
     log.info("tokens in=%d out=%d", resp.usage.input_tokens, resp.usage.output_tokens)
     usage["in"] += resp.usage.input_tokens
     usage["out"] += resp.usage.output_tokens
-    return resp.content[0].text
+    return next(b.text for b in resp.content if b.type == "text")  # skip thinking blocks
