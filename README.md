@@ -28,6 +28,6 @@ numerically instead of by eyeballing.
 
 ## Known limits
 
-- State is a CSV; `last_reminder` is not written back automatically.
+- State is a CSV. `--send` writes `last_reminder` back after every mail; mark an invoice paid by setting `paid` to `true`.
 - Checks are rule-based. An LLM-as-judge for tone is the next step.
 - English only so far.

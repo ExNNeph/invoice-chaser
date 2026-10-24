@@ -1,11 +1,11 @@
 """Usage: invoice-chaser invoices.csv [--send]   (dry run by default; --send needs SMTP_* env vars)"""
-import csv
 import os
 import smtplib
 import sys
 from datetime import date
 from email.message import EmailMessage
 
+from . import store
 from .drafter import draft
 from .models import Invoice
 from .schedule import next_reminder
@@ -21,16 +21,19 @@ def _send(inv: Invoice, body: str) -> None:
         s.send_message(msg)
 
 
-def main() -> None:
-    path, send = sys.argv[1], "--send" in sys.argv
-    with open(path, newline="") as f:
-        invoices = [Invoice(**row) for row in csv.DictReader(f)]
+def run(path: str, send: bool, today: date) -> None:
+    invoices = store.load(path)
     for inv in invoices:
-        stage = next_reminder(inv, date.today())
+        stage = next_reminder(inv, today)
         if not stage:
             continue
         body = draft(inv, stage)
         print(f"--- {inv.number} -> {inv.client_email} [{stage.value}]\n{body}\n")
         if send:
             _send(inv, body)
-    # ponytail: CSV in/out, no state; last_reminder must be updated by hand. Add SQLite when needed.
+            inv.last_reminder = today
+            store.save(path, invoices)  # after every mail, so a crash can't cause a resend
+
+
+def main() -> None:
+    run(sys.argv[1], "--send" in sys.argv, date.today())
