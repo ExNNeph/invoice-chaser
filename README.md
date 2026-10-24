@@ -13,13 +13,38 @@ Without an API key it falls back to a deterministic template, so everything runs
    check or an API error the deterministic template is sent instead.
 3. `cli.py` – dry run by default (prints drafts), `--send` sends via SMTP.
 
+## Quickstart
+
 ```bash
 pip install -e ".[dev]"
-cp invoices.example.csv invoices.csv
-invoice-chaser invoices.csv            # dry run
-ANTHROPIC_API_KEY=... invoice-chaser invoices.csv
-pytest                                  # unit tests + draft-quality eval
+cp invoices.example.csv invoices.csv       # columns: see the example file
+invoice-chaser invoices.csv                # dry run: prints the drafts, sends nothing
+invoice-chaser invoices.csv --send         # sends and records last_reminder
+invoice-chaser paid invoices.csv R-001     # stop chasing an invoice
+pytest                                     # unit tests + draft-quality eval
 ```
+
+Environment variables:
+
+| Variable | Needed for |
+|---|---|
+| `ANTHROPIC_API_KEY` | LLM drafts (optional; without it the template is used) |
+| `INVOICE_CHASER_MODEL` | override the model (default `claude-sonnet-5-5`) |
+| `SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD` | `--send` (SSL on port 465, e.g. `smtp.gmx.net`; use an app password) |
+
+Example dry-run output:
+
+```
+--- R-2026-001 -> bill@acme.de [friendly]
+Hi Acme GmbH, just a quick note that invoice R-2026-001, 1200.00 EUR, due 2026-01-10. Please let me
+know when I can expect the transfer.
+
+Best regards,
+Alexander
+```
+
+Run it daily with cron (`0 9 * * *  cd /path/to/invoice-chaser && .venv/bin/invoice-chaser invoices.csv --send`);
+the one-week gap and `last_reminder` make repeated runs safe.
 
 ## Evals
 
@@ -48,7 +73,11 @@ End-to-end check: one overdue test invoice sent through GMX SMTP (SSL, port 465)
 ## Known limits
 
 - The eval is small (12 LLM drafts) and rule-based: it checks facts and forbidden phrases, not tone.
+  An LLM-as-judge for tone is the next step.
+- State is a single CSV, no database, one sender. Fine for a freelancer, not for multi-user use.
+- Emails are English only; German drafts are planned.
+- Reminder timing (1 / 7 / 21 days overdue, one week gap) is fixed in `schedule.py`.
 
-- State is a CSV. `--send` writes `last_reminder` back after every mail; mark an invoice paid by setting `paid` to `true`.
-- Checks are rule-based. An LLM-as-judge for tone is the next step.
-- English only so far.
+## License
+
+MIT
