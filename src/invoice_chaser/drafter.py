@@ -5,6 +5,7 @@ from .checks import checks
 from .models import Invoice, Stage
 
 log = logging.getLogger(__name__)
+usage = {"in": 0, "out": 0}  # running token totals, read by evals/run_eval.py
 MODEL = os.getenv("INVOICE_CHASER_MODEL", "claude-sonnet-5-5")
 
 TONE = {
@@ -58,4 +59,6 @@ def _llm_draft(inv: Invoice, stage: Stage) -> str:
                    f"Facts: {_facts(inv)}. Tone: {TONE[stage]}."}],
     )
     log.info("tokens in=%d out=%d", resp.usage.input_tokens, resp.usage.output_tokens)
+    usage["in"] += resp.usage.input_tokens
+    usage["out"] += resp.usage.output_tokens
     return resp.content[0].text
