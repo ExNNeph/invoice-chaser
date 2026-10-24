@@ -42,6 +42,9 @@ The v1 failures were all the due-date check, a prompt gap rather than a model er
 those drafts would have been replaced by the template, so nothing wrong would have been sent.
 Cost is about 180 input and 160 output tokens per draft.
 
+End-to-end check: one overdue test invoice sent through GMX SMTP (SSL, port 465) with an LLM draft;
+`last_reminder` was written back and a second run the same day sent nothing.
+
 ## Known limits
 
 - The eval is small (12 LLM drafts) and rule-based: it checks facts and forbidden phrases, not tone.
