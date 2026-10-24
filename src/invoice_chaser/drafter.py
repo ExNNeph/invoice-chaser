@@ -1,6 +1,7 @@
 import logging
 import os
 
+from .checks import checks
 from .models import Invoice, Stage
 
 log = logging.getLogger(__name__)
@@ -29,8 +30,22 @@ def template_draft(inv: Invoice, stage: Stage) -> str:
 
 
 def draft(inv: Invoice, stage: Stage) -> str:
+    """LLM draft if a key is set, but only if it passes the checks; otherwise the safe template."""
     if not os.getenv("ANTHROPIC_API_KEY"):
         return template_draft(inv, stage)
+    try:
+        text = _llm_draft(inv, stage)
+    except Exception:  # API down, rate limit, bad key: a reminder must still go out
+        log.exception("LLM call failed, using template")
+        return template_draft(inv, stage)
+    failed = [k for k, ok in checks(inv, text).items() if not ok]
+    if failed:
+        log.warning("LLM draft for %s failed %s, using template", inv.number, failed)
+        return template_draft(inv, stage)
+    return text
+
+
+def _llm_draft(inv: Invoice, stage: Stage) -> str:
     import anthropic
 
     resp = anthropic.Anthropic().messages.create(

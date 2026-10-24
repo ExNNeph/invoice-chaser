@@ -8,7 +8,9 @@ Without an API key it falls back to a deterministic template, so everything runs
 
 1. `schedule.py` – pure function: given an invoice and today's date, which stage (if any) is due.
    Never chases paid invoices, never nags more than once a week.
-2. `drafter.py` – LLM drafts the email for that stage; template fallback; token usage is logged.
+2. `drafter.py` – LLM drafts the email for that stage; token usage is logged. Every LLM draft must pass
+   the rule checks in `checks.py` (amount, number, due date, no threats) before it is used; on a failed
+   check or an API error the deterministic template is sent instead.
 3. `cli.py` – dry run by default (prints drafts), `--send` sends via SMTP.
 
 ```bash
