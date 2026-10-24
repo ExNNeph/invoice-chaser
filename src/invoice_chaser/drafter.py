@@ -54,6 +54,7 @@ def _llm_draft(inv: Invoice, stage: Stage) -> str:
         max_tokens=400,
         system="You write short payment-reminder emails for a freelancer. Plain text, under 120 words, "
         "no subject line. Always include the invoice number, exact amount with currency and due date. "
+        "Write the due date exactly as DD.MM.YYYY. "
         "Never invent facts, fees or deadlines beyond those given.",
         messages=[{"role": "user", "content": f"Sender: {inv.sender_name}. Client: {inv.client_name}. "
                    f"Facts: {_facts(inv)}. Tone: {TONE[stage]}."}],
