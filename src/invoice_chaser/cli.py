@@ -63,7 +63,8 @@ def demo() -> None:
     except ImportError:
         raise SystemExit('The demo needs Streamlit: pip install -e ".[demo]"')
     subprocess.run([sys.executable, "-m", "streamlit", "run", str(DEMO_APP), "--server.address", "localhost",
-                    "--server.port", "8501", "--browser.gatherUsageStats", "false"])
+                    "--server.port", "8501", "--browser.gatherUsageStats", "false",
+                    "--client.toolbarMode", "minimal"])  # hides Streamlit's "Deploy" button
 
 
 def main() -> None:

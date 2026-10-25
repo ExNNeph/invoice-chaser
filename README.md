@@ -4,37 +4,42 @@ Polite, escalating payment reminders for freelancers. Overdue invoices from a CS
 **friendly → firm → final** email, drafted by an LLM (Claude) and checked by an automated eval.
 Without an API key it falls back to a deterministic template, so everything runs offline.
 
-## How it works
+## Preview
 
-1. `schedule.py` – pure function: given an invoice and today's date, which stage (if any) is due.
-   Never chases paid invoices, never nags more than once a week.
-2. `drafter.py` – LLM drafts the email for that stage; token usage is logged. Every LLM draft must pass
-   the rule checks in `checks.py` (amount, number, due date, no threats) before it is used; on a failed
-   check or an API error the deterministic template is sent instead.
-3. `cli.py` – dry run by default (prints drafts), `--send` sends via SMTP.
+The local web demo: edit invoices, pick a date and see which reminder each invoice gets.
 
-## Quickstart
+![Invoice table and reminder overview](docs/preview-overview.png)
 
-```bash
-pip install -e ".[dev]"
-cp invoices.example.csv invoices.csv       # columns: see the example file
-invoice-chaser invoices.csv                # dry run: prints the drafts, sends nothing
-invoice-chaser invoices.csv --send         # sends and records last_reminder
-invoice-chaser paid invoices.csv R-001     # stop chasing an invoice
-pytest                                     # unit tests + draft-quality eval
-```
+Click an invoice to read its reminder and the guardrail checks it passed:
 
-## Local demo
+![Final reminder for one invoice with its five checks](docs/preview-reminder.png)
 
-```bash
-pip install -e ".[demo]"
-invoice-chaser demo            # opens http://localhost:8501 in your browser
-```
+## Run it locally (step by step)
 
-An editable invoice table, a "today" date and the resulting reminders with their draft and the five
-guardrail checks. It runs only on your machine, is dry-run only and never sends mail.
+You need **Python 3.10+** and **git**. Everything runs on your own machine; the demo never sends an email.
 
-Things to try:
+1. Get the code:
+   ```bash
+   git clone https://github.com/ExNNeph/invoice-chaser.git
+   cd invoice-chaser
+   ```
+2. Create and activate a virtual environment, so nothing is installed system-wide:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate          # Windows: .venv\Scripts\activate
+   ```
+3. Install the project with the demo extras:
+   ```bash
+   pip install -e ".[demo]"
+   ```
+4. Start the demo:
+   ```bash
+   invoice-chaser demo
+   ```
+   Your browser opens **http://localhost:8501**. If it does not, open that address yourself.
+5. Stop it with `Ctrl-C` in the terminal. Next time, only steps 2 (`source .venv/bin/activate`) and 4 are needed.
+
+Things to try in the demo:
 - **Click a row** in the Reminders table to see that invoice's message and its five checks.
 - Move **Today** in the sidebar forward: reminders escalate from friendly to firm to final.
 - Tick **paid** on an invoice, or set a recent **last_reminder**: it gets no reminder.
@@ -44,7 +49,27 @@ Things to try:
   and "Write a new version" asks for a fresh one. If the call fails, the page shows the exact error;
   if a draft fails a check, the guardrail swaps in the template and says which check failed.
 
-Stop it with `Ctrl-C` in the terminal.
+## How it works
+
+1. `schedule.py` – pure function: given an invoice and today's date, which stage (if any) is due.
+   Never chases paid invoices, never nags more than once a week.
+2. `drafter.py` – LLM drafts the email for that stage; token usage is logged. Every LLM draft must pass
+   the rule checks in `checks.py` (amount, number, due date, no threats) before it is used; on a failed
+   check or an API error the deterministic template is sent instead.
+3. `cli.py` – dry run by default (prints drafts), `--send` sends via SMTP.
+
+## Command line (real use)
+
+With the virtual environment from the steps above active:
+
+```bash
+pip install -e ".[dev]"                    # adds pytest
+cp invoices.example.csv invoices.csv       # your invoices; columns: see the example file
+invoice-chaser invoices.csv                # dry run: prints the drafts, sends nothing
+invoice-chaser invoices.csv --send         # sends and records last_reminder
+invoice-chaser paid invoices.csv R-001     # stop chasing an invoice
+pytest                                     # unit tests + draft-quality eval
+```
 
 Environment variables (CLI):
 
