@@ -23,12 +23,16 @@ def _facts(inv: Invoice) -> str:
 
 def template_draft(inv: Invoice, stage: Stage) -> str:
     """Deterministic fallback; also the baseline the LLM output is evaluated against."""
-    opener = {
-        Stage.FRIENDLY: f"Hi {inv.client_name}, just a quick note that",
-        Stage.FIRM: f"Dear {inv.client_name}, I have not yet received payment for",
-        Stage.FINAL: f"Dear {inv.client_name}, this is my final reminder regarding",
+    facts = f"invoice {inv.number} ({inv.amount:.2f} {inv.currency}), due on {inv.due_date:%d.%m.%Y}"
+    body = {
+        Stage.FRIENDLY: f"Hi {inv.client_name},\n\nJust a friendly reminder about {facts}. It has probably "
+        "just slipped through. Could you let me know when I can expect the transfer?",
+        Stage.FIRM: f"Dear {inv.client_name},\n\nI have not yet received payment for {facts}. "
+        "Please let me know by when the transfer will be made.",
+        Stage.FINAL: f"Dear {inv.client_name},\n\nThis is my final reminder regarding {facts}. "
+        "Please arrange payment as soon as possible, or contact me if there is a problem with the invoice.",
     }[stage]
-    return f"{opener} {_facts(inv)}. Please let me know when I can expect the transfer.\n\nBest regards,\n{inv.sender_name}"
+    return f"{body}\n\nBest regards,\n{inv.sender_name}"
 
 
 @dataclass
@@ -47,7 +51,7 @@ def draft_info(inv: Invoice, stage: Stage, api_key: str | None = None) -> Draft:
     try:
         text = _llm_draft(inv, stage, key)
     except Exception as e:  # API down, rate limit, bad key: a reminder must still go out
-        log.exception("LLM call failed, using template")
+        log.warning("LLM call failed (%s), using template", type(e).__name__)
         return Draft(template_draft(inv, stage), "template (API error)", error=f"{type(e).__name__}: {e}"[:300])
     failed = [k for k, ok in checks(inv, text).items() if not ok]
     if failed:

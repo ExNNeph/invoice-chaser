@@ -14,6 +14,7 @@ from invoice_chaser.models import Invoice, Stage
 
 CASES = json.loads((Path(__file__).parent / "cases.json").read_text())
 
+
 @pytest.mark.parametrize("case", CASES, ids=lambda c: f"{c['number']}-{c['stage']}")
 def test_draft(case):
     inv = Invoice(**{k: v for k, v in case.items() if k != "stage"})

@@ -58,8 +58,10 @@ Example dry-run output:
 
 ```
 --- R-2026-001 -> bill@acme.de [friendly]
-Hi Acme GmbH, just a quick note that invoice R-2026-001, 1200.00 EUR, due 2026-01-10. Please let me
-know when I can expect the transfer.
+Hi Acme GmbH,
+
+Just a friendly reminder about invoice R-2026-001 (1200.00 EUR), due on 10.01.2026. It has probably
+just slipped through. Could you let me know when I can expect the transfer?
 
 Best regards,
 Alexander
