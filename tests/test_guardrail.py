@@ -34,3 +34,5 @@ def test_api_error_falls_back(monkeypatch):
 
     setup(monkeypatch, boom)
     assert drafter.draft(INV, Stage.FIRM) == drafter.template_draft(INV, Stage.FIRM)
+    result = drafter.draft_info(INV, Stage.FIRM)
+    assert (result.source, result.error) == ("template (API error)", "RuntimeError: rate limited")

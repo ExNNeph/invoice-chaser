@@ -1,5 +1,6 @@
 import logging
 import os
+from dataclasses import dataclass, field
 
 from .checks import checks
 from .models import Invoice, Stage
@@ -30,27 +31,33 @@ def template_draft(inv: Invoice, stage: Stage) -> str:
     return f"{opener} {_facts(inv)}. Please let me know when I can expect the transfer.\n\nBest regards,\n{inv.sender_name}"
 
 
-def draft_info(inv: Invoice, stage: Stage, api_key: str | None = None) -> tuple[str, str, list[str]]:
-    """Return (text, source, failed_checks). LLM draft if a key is available and it passes the
-    checks; otherwise the safe template. source is "llm", "template", "template (API error)"
-    or "template (guardrail)"."""
+@dataclass
+class Draft:
+    text: str
+    source: str  # "llm", "template", "template (API error)" or "template (guardrail)"
+    failed: list[str] = field(default_factory=list)  # checks the LLM draft failed
+    error: str = ""  # why the LLM call failed
+
+
+def draft_info(inv: Invoice, stage: Stage, api_key: str | None = None) -> Draft:
+    """LLM draft if a key is available and it passes the checks; otherwise the safe template."""
     key = api_key or os.getenv("ANTHROPIC_API_KEY")
     if not key:
-        return template_draft(inv, stage), "template", []
+        return Draft(template_draft(inv, stage), "template")
     try:
         text = _llm_draft(inv, stage, key)
-    except Exception:  # API down, rate limit, bad key: a reminder must still go out
+    except Exception as e:  # API down, rate limit, bad key: a reminder must still go out
         log.exception("LLM call failed, using template")
-        return template_draft(inv, stage), "template (API error)", []
+        return Draft(template_draft(inv, stage), "template (API error)", error=f"{type(e).__name__}: {e}"[:300])
     failed = [k for k, ok in checks(inv, text).items() if not ok]
     if failed:
         log.warning("LLM draft for %s failed %s, using template", inv.number, failed)
-        return template_draft(inv, stage), "template (guardrail)", failed
-    return text, "llm", []
+        return Draft(template_draft(inv, stage), "template (guardrail)", failed)
+    return Draft(text, "llm")
 
 
 def draft(inv: Invoice, stage: Stage) -> str:
-    return draft_info(inv, stage)[0]
+    return draft_info(inv, stage).text
 
 
 def _llm_draft(inv: Invoice, stage: Stage, api_key: str | None = None) -> str:

@@ -35,11 +35,14 @@ An editable invoice table, a "today" date and the resulting reminders with their
 guardrail checks. It runs only on your machine, is dry-run only and never sends mail.
 
 Things to try:
+- **Click a row** in the Reminders table to see that invoice's message and its five checks.
 - Move **Today** in the sidebar forward: reminders escalate from friendly to firm to final.
-- Tick **paid** on an invoice, or set a recent **last_reminder**: it drops out of the list.
-- Edit an amount or due date: the draft and the checks update immediately.
-- Paste your Anthropic key in the sidebar (used for this session only, never stored) to see LLM drafts.
-  A draft that fails a check is replaced by the template and the page tells you why.
+- Tick **paid** on an invoice, or set a recent **last_reminder**: it gets no reminder.
+- **Add a row** at the bottom of the invoice table: it gets the next number (e.g. `R-107`) and editable defaults.
+- Paste your Anthropic key in the sidebar and **press Enter** (used for this session only, never stored).
+  The clicked invoice is then written by Claude; each draft is cached, so clicking around costs nothing extra,
+  and "Write a new version" asks for a fresh one. If the call fails, the page shows the exact error;
+  if a draft fails a check, the guardrail swaps in the template and says which check failed.
 
 Stop it with `Ctrl-C` in the terminal.
 

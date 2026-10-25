@@ -1,3 +1,4 @@
+import re
 from datetime import date
 from enum import Enum
 
@@ -20,3 +21,9 @@ class Invoice(BaseModel):
     paid: bool = False
     last_reminder: date | None = None
     sender_name: str = "Alexander"
+
+
+def next_number(existing: list[str], prefix: str = "R-") -> str:
+    """Next free invoice number after the highest "R-<n>" in use, e.g. R-106 -> R-107."""
+    nums = [int(m.group(1)) for n in existing if (m := re.fullmatch(re.escape(prefix) + r"(\d+)", str(n).strip()))]
+    return f"{prefix}{max(nums, default=100) + 1}"
