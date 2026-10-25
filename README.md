@@ -24,17 +24,24 @@ invoice-chaser paid invoices.csv R-001     # stop chasing an invoice
 pytest                                     # unit tests + draft-quality eval
 ```
 
-## Web demo
+## Local demo
 
 ```bash
 pip install -e ".[demo]"
-streamlit run app.py
+invoice-chaser demo            # opens http://localhost:8501 in your browser
 ```
 
 An editable invoice table, a "today" date and the resulting reminders with their draft and the five
-guardrail checks. It is dry-run only and never sends mail. Without an API key it shows the template
-drafts; a visitor can paste their own Anthropic key in the sidebar (used per session, never stored)
-to see LLM drafts and the guardrail fallback in action.
+guardrail checks. It runs only on your machine, is dry-run only and never sends mail.
+
+Things to try:
+- Move **Today** in the sidebar forward: reminders escalate from friendly to firm to final.
+- Tick **paid** on an invoice, or set a recent **last_reminder**: it drops out of the list.
+- Edit an amount or due date: the draft and the checks update immediately.
+- Paste your Anthropic key in the sidebar (used for this session only, never stored) to see LLM drafts.
+  A draft that fails a check is replaced by the template and the page tells you why.
+
+Stop it with `Ctrl-C` in the terminal.
 
 Environment variables (CLI):
 

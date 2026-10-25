@@ -1,10 +1,13 @@
 """Usage: invoice-chaser invoices.csv [--send]   (dry run by default; --send needs SMTP_* env vars)
-       invoice-chaser paid invoices.csv NUMBER"""
+       invoice-chaser paid invoices.csv NUMBER
+       invoice-chaser demo                      (local web demo, dry run only)"""
 import os
 import smtplib
+import subprocess
 import sys
 from datetime import date
 from email.message import EmailMessage
+from pathlib import Path
 
 from . import store
 from .drafter import draft
@@ -13,6 +16,7 @@ from .schedule import next_reminder
 
 
 SMTP_VARS = ["SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD"]
+DEMO_APP = Path(__file__).with_name("demo_app.py")
 
 
 def _send(inv: Invoice, body: str) -> None:
@@ -52,11 +56,24 @@ def run(path: str, send: bool, today: date) -> None:
             store.save(path, invoices)  # after every mail, so a crash can't cause a resend
 
 
+def demo() -> None:
+    """Start the dry-run web demo on http://localhost:8501 and open the browser."""
+    try:
+        import streamlit  # noqa: F401
+    except ImportError:
+        raise SystemExit('The demo needs Streamlit: pip install -e ".[demo]"')
+    subprocess.run([sys.executable, "-m", "streamlit", "run", str(DEMO_APP), "--server.address", "localhost",
+                    "--server.port", "8501", "--browser.gatherUsageStats", "false"])
+
+
 def main() -> None:
     args = [a for a in sys.argv[1:] if a != "--send"]
-    if args[:1] == ["paid"] and len(args) == 3:
+    if args == ["demo"]:
+        demo()
+    elif args[:1] == ["paid"] and len(args) == 3:
         mark_paid(args[1], args[2])
     elif len(args) == 1:
         run(args[0], "--send" in sys.argv, date.today())
     else:
-        raise SystemExit("Usage: invoice-chaser invoices.csv [--send]\n       invoice-chaser paid invoices.csv NUMBER")
+        raise SystemExit("Usage: invoice-chaser invoices.csv [--send]\n       invoice-chaser paid invoices.csv NUMBER\n"
+                         "       invoice-chaser demo")

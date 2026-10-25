@@ -1,4 +1,4 @@
-"""Web demo (dry run only, nothing is ever sent):  streamlit run app.py"""
+"""Local web demo (dry run only, nothing is ever sent): started with `invoice-chaser demo`."""
 from datetime import date, timedelta
 
 import pandas as pd
