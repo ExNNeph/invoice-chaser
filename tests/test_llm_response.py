@@ -13,5 +13,5 @@ def test_thinking_block_before_text_is_skipped(monkeypatch):
     resp = NS(content=[NS(type="thinking"), NS(type="text", text="the email")],
               usage=NS(input_tokens=1, output_tokens=1))
     fake = NS(messages=NS(create=lambda **kw: resp))
-    monkeypatch.setattr(anthropic, "Anthropic", lambda: fake)
+    monkeypatch.setattr(anthropic, "Anthropic", lambda **kw: fake)
     assert drafter._llm_draft(INV, Stage.FRIENDLY) == "the email"

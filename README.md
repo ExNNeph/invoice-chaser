@@ -24,7 +24,19 @@ invoice-chaser paid invoices.csv R-001     # stop chasing an invoice
 pytest                                     # unit tests + draft-quality eval
 ```
 
-Environment variables:
+## Web demo
+
+```bash
+pip install -e ".[demo]"
+streamlit run app.py
+```
+
+An editable invoice table, a "today" date and the resulting reminders with their draft and the five
+guardrail checks. It is dry-run only and never sends mail. Without an API key it shows the template
+drafts; a visitor can paste their own Anthropic key in the sidebar (used per session, never stored)
+to see LLM drafts and the guardrail fallback in action.
+
+Environment variables (CLI):
 
 | Variable | Needed for |
 |---|---|

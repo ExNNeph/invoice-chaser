@@ -6,7 +6,8 @@ requires-python = ">=3.10"
 dependencies = ["pydantic>=2", "anthropic>=0.40"]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+demo = ["streamlit"]
+dev = ["pytest", "streamlit"]
 
 [project.scripts]
 invoice-chaser = "invoice_chaser.cli:main"
